@@ -1,13 +1,9 @@
 package com.app.testingService.service;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.app.testingService.models.Note;
 import com.app.testingService.models.Person;
 import com.app.testingService.repos.NoteRepo;
 import com.app.testingService.repos.PersonRepo;
