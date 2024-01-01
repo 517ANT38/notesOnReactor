@@ -1,6 +1,6 @@
 package com.app.testingService.controllers;
 
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,17 +52,12 @@ public class NoteController {
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Note>> updateNote(@PathVariable long id, @RequestBody Note note) {
         return nService.updateNote(id, note)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok);
     }
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteNote(@PathVariable long id) {
-        return nService.findNoteById(id)
-                .flatMap(s ->
-                        nService.deleteNote(s)
-                                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
-                )
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return nService.deleteNote(id).onErrorMap(error -> error)
+            .map(x -> ResponseEntity.ofNullable(x));
     }
 }

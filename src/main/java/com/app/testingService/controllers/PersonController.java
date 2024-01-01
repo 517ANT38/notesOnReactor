@@ -1,6 +1,6 @@
 package com.app.testingService.controllers;
 
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 // import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,11 +62,7 @@ public class PersonController {
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deletePerson(@PathVariable long id) {
-        return nService.findPersonById(id)
-                .flatMap(s ->
-                        nService.deletePerson(s)
-                                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
-                )
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return nService.deletePerson(id).onErrorMap(error -> error)
+        .map(x -> ResponseEntity.ofNullable(x));
     }
 }

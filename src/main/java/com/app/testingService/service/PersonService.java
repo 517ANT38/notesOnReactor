@@ -4,9 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.app.testingService.app.NotFoundException;
 import com.app.testingService.models.Person;
 import com.app.testingService.repos.NoteRepo;
 import com.app.testingService.repos.PersonRepo;
@@ -28,42 +30,42 @@ public class PersonService {
 
     @PostConstruct
     void createDefaultAdmin(){
-        var admin = pRepo.save(Person.builder()
-            .username("admin")
-            .password(passwordEncoder.encode("admin"))
-            .enabled(true) 
-            .roles(Collections.singletonList("ROLE_ADMIN"))
-            .createdAt(LocalDateTime.now())
-            .build())
+        var admin = pRepo.findByUsername("admin")
+            .switchIfEmpty(pRepo.save(Person.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin"))
+                .enabled(true) 
+                .roles(Collections.singletonList("ROLE_ADMIN"))
+                .createdAt(LocalDateTime.now())
+                .build()))
             .block();
-             log.info("Created admin with ID = " + admin.getId());
+            log.info("Created admin with ID = " + admin.getId());
     }
 
+    @PreAuthorize("hasRole('Admin')")
     public Flux<Person> findPersons(){
         return pRepo.findAll()
                .flatMap(x -> {
                     return nRepo.findByPersonId(x.getId())
-                        .collect(Collectors.toSet()).map(y -> {
-                                x.setNotes(y);
-                                    return x;
-                        });
-                    
+                        .collect(Collectors.toSet()).map(y -> x.toBuilder().notes(y).build());
                 });
                 
     }
     
+    @PreAuthorize("hasRole('Admin')")
     public Mono<Person> findPersonsByUserName(String n){
         return pRepo.findByUsername(n);
     }
 
+    @PreAuthorize("hasRole('Admin')")
     public Mono<Person> findPersonById(long id){
         return nRepo.findByPersonId(id)
+            .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
             .collect(Collectors.toSet())
             .flatMap(p -> {
-                return pRepo.findById(id).map(x ->{
-                    x.setNotes(p);
-                    return x;
-                });
+                return pRepo.findById(id).map(x -> x.toBuilder()
+                    .notes(p)
+                    .build());
             });
     }
 
@@ -77,14 +79,25 @@ public class PersonService {
     }
 
     public Mono<Person> updatePerson(long id, Person p){
-        return pRepo.findById(id)
-                .flatMap(s->{
-                    p.setId(s.getId());
-                    return pRepo.save(p);
-                });
+        return pRepo.existsById(id).flatMap(x -> {
+            if (x) {
+                return pRepo.save(p.toBuilder().id(id).build());
+            } else {
+                return Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND"));
+            }
+        });
+       
     }
 
-    public Mono<Void> deletePerson(Person p){
-        return pRepo.delete(p);
+    @PreAuthorize("hasRole('Admin')")
+    public Mono<Void> deletePerson(long id){
+        return  pRepo.existsById(id).flatMap(x -> {
+            if (x) {
+                return pRepo.deleteById(id);
+            } else {
+                return Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND"));
+            }
+        });
+        
     }
 }

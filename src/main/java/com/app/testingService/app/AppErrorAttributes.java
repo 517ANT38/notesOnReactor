@@ -32,8 +32,14 @@ public class AppErrorAttributes extends DefaultErrorAttributes{
 
         var errorList = new ArrayList<Map<String, Object>>();
 
-        if (error instanceof AuthException || error instanceof UnauthorizedException) {
+        if (error instanceof ApiException || error instanceof UnauthorizedException) {
             status = HttpStatus.UNAUTHORIZED;
+            var errorMap = new LinkedHashMap<String, Object>();
+            errorMap.put("code", ((ApiException) error).getErrorCode());
+            errorMap.put("message", error.getMessage());
+            errorList.add(errorMap);
+        } else if(error instanceof NotFoundException){
+            status = HttpStatus.NOT_FOUND;
             var errorMap = new LinkedHashMap<String, Object>();
             errorMap.put("code", ((ApiException) error).getErrorCode());
             errorMap.put("message", error.getMessage());

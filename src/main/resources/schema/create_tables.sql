@@ -15,5 +15,5 @@ CREATE TABLE Note(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title VARCHAR(50),
     txt VARCHAR(50),
-    person_id BIGINT REFERENCES Person(id)    
+    person_id BIGINT REFERENCES Person(id) ON DELETE CASCADE   
 );
