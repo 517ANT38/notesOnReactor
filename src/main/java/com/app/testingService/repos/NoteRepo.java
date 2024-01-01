@@ -8,9 +8,9 @@ import com.app.testingService.models.Note;
 import reactor.core.publisher.Flux;
 
 @Repository
-public interface NoteRepo extends ReactiveCrudRepository<Note, Integer> {
+public interface NoteRepo extends ReactiveCrudRepository<Note, Long> {
     
     Flux<Note> findByTitle(String t);
 
-    Flux<Note> findByPersonId(int id);
+    Flux<Note> findByPersonId(Long id);
 }

@@ -5,10 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.app.testingService.models.Person;
 
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
 public interface PersonRepo extends ReactiveCrudRepository<Person,Integer> {
     
-    Flux<Person> findByName(String n);
+    Mono<Person> findByUsername(String username);
+    Mono<Person> findById(Long id);
 }

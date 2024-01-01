@@ -26,7 +26,7 @@ public class NoteController {
     private final NoteService nService;
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<Note>> getNote(@PathVariable int id) {
+    public Mono<ResponseEntity<Note>> getNote(@PathVariable long id) {
         return nService.findNoteById(id)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -50,14 +50,14 @@ public class NoteController {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Note>> updateNote(@PathVariable int id, @RequestBody Note note) {
+    public Mono<ResponseEntity<Note>> updateNote(@PathVariable long id, @RequestBody Note note) {
         return nService.updateNote(id, note)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> deleteNote(@PathVariable int id) {
+    public Mono<ResponseEntity<Void>> deleteNote(@PathVariable long id) {
         return nService.findNoteById(id)
                 .flatMap(s ->
                         nService.deleteNote(s)

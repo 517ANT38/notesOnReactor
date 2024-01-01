@@ -1,24 +1,30 @@
 package com.app.testingService.service;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.app.testingService.models.Person;
 import com.app.testingService.repos.NoteRepo;
 import com.app.testingService.repos.PersonRepo;
 
+
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class PersonService {
     
     private final PersonRepo pRepo;
     private final NoteRepo nRepo;
-
+    private final PasswordEncoder passwordEncoder;
 
     public Flux<Person> findPersons(){
         return pRepo.findAll()
@@ -33,11 +39,11 @@ public class PersonService {
                 
     }
     
-    public Flux<Person> findPersonsByName(String n){
-        return pRepo.findByName(n);
+    public Mono<Person> findPersonsByUserName(String n){
+        return pRepo.findByUsername(n);
     }
 
-    public Mono<Person> findPersonById(int id){
+    public Mono<Person> findPersonById(long id){
         return nRepo.findByPersonId(id)
             .collect(Collectors.toSet())
             .flatMap(p -> {
@@ -49,21 +55,15 @@ public class PersonService {
     }
 
     public Mono<Person> addNewPerson(Person p){
-        var v = pRepo.save(p);
-        var r = v.filter(x -> x.getNotes()!=null)
-                 .map(x -> x.getNotes().stream().map(y -> { 
-            y.setPersonId(x.getId()); 
-            nRepo.save(y);
-            return y;
-        }).collect(Collectors.toSet()));
-        // Проверка что происходит ошибка если нет у person заметок. Исправил .filter
-        // .onErrorReturn(NullPointerException.class, 
-        //     new HashSet<Note>(Set.of(new Note(0,"default","default",0,null))));
-        // r.subscribe(g -> System.out.println(g), e -> System.out.println(e));
-        return v;
+        return pRepo.save(p.toBuilder().password(passwordEncoder.encode(p.getPassword()))
+            .roles(Collections.singletonList("ROLE_USER"))
+            .enabled(true)
+            .createdAt(LocalDateTime.now())
+            .build())
+            .doOnSuccess(u -> log.info("Created new user with ID = " + u.getId()));
     }
 
-    public Mono<Person> updatePerson(int id, Person p){
+    public Mono<Person> updatePerson(long id, Person p){
         return pRepo.findById(id)
                 .flatMap(s->{
                     p.setId(s.getId());

@@ -27,7 +27,7 @@ public class NoteService {
             .flatMap(this::getChangeNote);
     }
 
-    public Mono<Note> findNoteById(int id){
+    public Mono<Note> findNoteById(long id){
         return nRepo.findById(id)
             .flatMap(this::getChangeNote);
     }
@@ -36,7 +36,7 @@ public class NoteService {
         return nRepo.save(p).flatMap(this::getChangeNote);
     }
 
-    public Mono<Note> updateNote(int id, Note p){
+    public Mono<Note> updateNote(long id, Note p){
         return nRepo.findById(id)
                 .flatMap(s->{
                     p.setId(s.getId());

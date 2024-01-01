@@ -27,7 +27,7 @@ public class PersonController {
     private final PersonService nService;
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<Person>> getPerson(@PathVariable int id) {
+    public Mono<ResponseEntity<Person>> getPerson(@PathVariable long id) {
         return nService.findPersonById(id)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -38,10 +38,7 @@ public class PersonController {
         return nService.findPersons();
     }
 
-    @GetMapping("/name/{name}")
-    public Flux<Person> listPersonsByName(@PathVariable String name) {
-        return nService.findPersonsByName(name);
-    }
+   
 
     @PostMapping
     public Mono<ResponseEntity<Person>> addNewPerson(@RequestBody Person Person) {
@@ -51,15 +48,14 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Person>> updatePerson(@PathVariable int id, @RequestBody Person Person) {
+    public Mono<ResponseEntity<Person>> updatePerson(@PathVariable long id, @RequestBody Person Person) {
         return nService.updatePerson(id, Person)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    // @PreAuthorize("hasRole('ADMIN')")
-    public Mono<ResponseEntity<Void>> deletePerson(@PathVariable int id) {
+    public Mono<ResponseEntity<Void>> deletePerson(@PathVariable long id) {
         return nService.findPersonById(id)
                 .flatMap(s ->
                         nService.deletePerson(s)
