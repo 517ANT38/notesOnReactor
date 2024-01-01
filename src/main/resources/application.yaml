@@ -10,7 +10,7 @@ spring:
     visibility:
       field: any
 app:
-  public_routes: /login,/public/**,/version,/status,/actuator/**
+  public_routes: /login,/info/**,/version,/status,/actuator/**
 jwt:
   password:
     encoder:

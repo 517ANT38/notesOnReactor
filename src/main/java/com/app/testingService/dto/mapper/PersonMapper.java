@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 import com.app.testingService.dto.PersonDto;
+import com.app.testingService.dto.PersonDtoWithNotes;
 import com.app.testingService.models.Person;
 
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -15,4 +16,5 @@ public interface PersonMapper {
     @InheritInverseConfiguration
     Person map(PersonDto dto);
 
+    PersonDtoWithNotes mapWithNotes(Person p);
 }

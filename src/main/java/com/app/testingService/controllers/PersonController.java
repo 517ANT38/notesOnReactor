@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.testingService.dto.PersonDto;
+import com.app.testingService.dto.PersonDtoWithNotes;
+import com.app.testingService.dto.mapper.PersonMapper;
 import com.app.testingService.models.Person;
 import com.app.testingService.service.PersonService;
 
@@ -25,10 +28,12 @@ import reactor.core.publisher.Mono;
 public class PersonController {
     
     private final PersonService nService;
+    private final PersonMapper personMapper;
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<Person>> getPerson(@PathVariable long id) {
+    public Mono<ResponseEntity<PersonDtoWithNotes>> getPerson(@PathVariable long id) {
         return nService.findPersonById(id)
+                .map(personMapper::mapWithNotes)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -41,15 +46,16 @@ public class PersonController {
    
 
     @PostMapping
-    public Mono<ResponseEntity<Person>> addNewPerson(@RequestBody Person Person) {
-        return nService.addNewPerson(Person)
+    public Mono<ResponseEntity<PersonDtoWithNotes>> addNewPerson(@RequestBody PersonDto person) {
+        return nService.addNewPerson(personMapper.map(person))
+                .map(personMapper::mapWithNotes)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Person>> updatePerson(@PathVariable long id, @RequestBody Person Person) {
-        return nService.updatePerson(id, Person)
+    public Mono<ResponseEntity<Person>> updatePerson(@PathVariable long id, @RequestBody PersonDto person) {
+        return nService.updatePerson(id, personMapper.map(person))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

@@ -1,6 +1,7 @@
 CREATE TABLE Person(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username   VARCHAR(64),
+    info       VARCHAR(64),
     password   VARCHAR(64),
     roles      TEXT[],
     first_name VARCHAR(64),
@@ -14,5 +15,5 @@ CREATE TABLE Note(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title VARCHAR(50),
     txt VARCHAR(50),
-    personId BIGINT REFERENCES Person(id)    
+    person_id BIGINT REFERENCES Person(id)    
 );

@@ -28,13 +28,15 @@ public class PersonService {
 
     @PostConstruct
     void createDefaultAdmin(){
-        pRepo.save(Person.builder()
+        var admin = pRepo.save(Person.builder()
             .username("admin")
-            .password(passwordEncoder.encode("admin")) 
+            .password(passwordEncoder.encode("admin"))
+            .enabled(true) 
             .roles(Collections.singletonList("ROLE_ADMIN"))
             .createdAt(LocalDateTime.now())
             .build())
-            .doOnSuccess(u -> log.info("Created admin with ID = " + u.getId()));
+            .block();
+             log.info("Created admin with ID = " + admin.getId());
     }
 
     public Flux<Person> findPersons(){
