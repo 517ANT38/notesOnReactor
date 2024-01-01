@@ -15,10 +15,9 @@ import lombok.NoArgsConstructor;
 @Table
 public class Note {
     @Id
-    private Integer id;
+    private Long id;
     private String title;
     private String txt;
-    @Column("personid")
     private int personId;
     @Transient
     private Person person;
