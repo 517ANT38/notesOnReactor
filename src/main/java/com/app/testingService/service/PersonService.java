@@ -11,7 +11,7 @@ import com.app.testingService.models.Person;
 import com.app.testingService.repos.NoteRepo;
 import com.app.testingService.repos.PersonRepo;
 
-
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -25,6 +25,17 @@ public class PersonService {
     private final PersonRepo pRepo;
     private final NoteRepo nRepo;
     private final PasswordEncoder passwordEncoder;
+
+    @PostConstruct
+    void createDefaultAdmin(){
+        pRepo.save(Person.builder()
+            .username("admin")
+            .password(passwordEncoder.encode("admin")) 
+            .roles(Collections.singletonList("ROLE_ADMIN"))
+            .createdAt(LocalDateTime.now())
+            .build())
+            .doOnSuccess(u -> log.info("Created admin with ID = " + u.getId()));
+    }
 
     public Flux<Person> findPersons(){
         return pRepo.findAll()

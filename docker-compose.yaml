@@ -2,9 +2,9 @@ version: '3.7'
 
 services:
 
-  db:
+  db_app_notes:
     image: postgres 
-    container_name: db   
+    container_name: db_app_notes   
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -22,6 +22,6 @@ services:
     ports:
       - "5080:80"
     depends_on:
-      - db
+      - db_app_notes
       
           
