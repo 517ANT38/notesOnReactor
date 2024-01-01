@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.testingService.dto.NoteDto;
+import com.app.testingService.dto.mapper.NoteMapper;
 import com.app.testingService.models.Note;
 import com.app.testingService.service.NoteService;
 
@@ -24,12 +26,19 @@ import reactor.core.publisher.Mono;
 public class NoteController {
     
     private final NoteService nService;
+    private final NoteMapper mNoteMapper;
 
     @GetMapping("/{id}")
     public Mono<ResponseEntity<Note>> getNote(@PathVariable long id) {
         return nService.findNoteById(id)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/{id}/person_id/{personId}")
+    public Mono<ResponseEntity<Note>> getNote(@PathVariable("id") long id,
+        @PathVariable("personId") long personId) {
+        return nService.findNoteById(id,personId)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping
@@ -38,14 +47,26 @@ public class NoteController {
                 
     }
 
-    @GetMapping("/title/{title}")
+    @GetMapping("/person_id/{personId}")
+    public Flux<Note> listNotes(@PathVariable("personId") long personId) {
+        return nService.findNotes(personId);
+                
+    }
+
+    @GetMapping("/title/{title}/")
     public Flux<Note> listNotesByTitle(@PathVariable String title) {
         return nService.findNotesByTitle(title);
     }
 
-    @PostMapping
-    public Mono<ResponseEntity<Note>> addNewNote(@RequestBody Note Note) {
-        return nService.addNewNote(Note)
+    @GetMapping("/title/{title}/person_id/{personId}")
+    public Flux<Note> listNotesByTitle(@PathVariable("title") String title,
+        @PathVariable("personId") long personId) {
+        return nService.findNotesByTitle(title,personId);
+    }
+
+    @PostMapping("/personId/{personId}")
+    public Mono<ResponseEntity<Note>> addNewNote(@PathVariable("personId") long personId, @RequestBody NoteDto dto){
+        return nService.addNewNote(mNoteMapper.map(dto),personId)
                 .map(ResponseEntity::ok);
     }
 
@@ -55,9 +76,24 @@ public class NoteController {
                 .map(ResponseEntity::ok);
     }
 
+    @PutMapping("/{id}/person_id/{personId}")
+    public Mono<ResponseEntity<Note>> updateNote(@PathVariable("id") long id, 
+        @PathVariable("personId") long personId, @RequestBody Note note) {
+        return nService.updateNote(id,personId,note)
+                .map(ResponseEntity::ok);
+    }
+
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteNote(@PathVariable long id) {
         return nService.deleteNote(id).onErrorMap(error -> error)
+            .map(x -> ResponseEntity.ofNullable(x));
+    }
+
+
+    @DeleteMapping("/{id}/person_id/{personId}")
+    public Mono<ResponseEntity<Void>> deleteNote(@PathVariable("id") long id, 
+        @PathVariable("personId") long personId){
+        return nService.deleteNote(id,personId).onErrorMap(error -> error)
             .map(x -> ResponseEntity.ofNullable(x));
     }
 }

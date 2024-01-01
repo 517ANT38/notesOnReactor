@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import com.app.testingService.configuration.security.auth.UnauthorizedException;
 import com.app.testingService.configuration.security.auth.UserPrincipal;
 import com.app.testingService.repos.PersonRepo;
-import com.app.testingService.service.PersonService;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;

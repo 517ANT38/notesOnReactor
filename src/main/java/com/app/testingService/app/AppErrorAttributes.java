@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 import com.app.testingService.configuration.security.auth.UnauthorizedException;
-import com.app.testingService.service.security.AuthException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
