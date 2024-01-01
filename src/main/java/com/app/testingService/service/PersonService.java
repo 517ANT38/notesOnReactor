@@ -42,7 +42,7 @@ public class PersonService {
             log.info("Created admin with ID = " + admin.getId());
     }
 
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Flux<Person> findPersons(){
         return pRepo.findAll()
                .flatMap(x -> {
@@ -52,12 +52,12 @@ public class PersonService {
                 
     }
     
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Person> findPersonsByUserName(String n){
         return pRepo.findByUsername(n);
     }
 
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Person> findPersonById(long id){
         return nRepo.findByPersonId(id)
             .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
@@ -89,7 +89,7 @@ public class PersonService {
        
     }
 
-    @PreAuthorize("hasRole('Admin')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public Mono<Void> deletePerson(long id){
         return  pRepo.existsById(id).flatMap(x -> {
             if (x) {

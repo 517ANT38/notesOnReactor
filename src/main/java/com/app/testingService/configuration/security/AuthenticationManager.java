@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.app.testingService.configuration.security.auth.UnauthorizedException;
 import com.app.testingService.configuration.security.auth.UserPrincipal;
+import com.app.testingService.repos.PersonRepo;
 import com.app.testingService.service.PersonService;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AuthenticationManager implements ReactiveAuthenticationManager {
     
-    private final PersonService userService;
+    private final PersonRepo pRepo;
 
     
     @Override
@@ -24,7 +25,7 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
         var principal = (UserPrincipal) authentication.getPrincipal();
 
         
-        return userService.findPersonById(principal.getId())
+        return pRepo.findById(principal.getId())
                 .filter(user -> user.isEnabled())
                 .switchIfEmpty(Mono.error(new UnauthorizedException("User account is disabled.")))
                 .map(user -> authentication);

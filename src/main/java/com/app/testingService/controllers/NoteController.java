@@ -32,7 +32,7 @@ public class NoteController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/")
+    @GetMapping
     public Flux<Note> listNotes() {
         return nService.findNotes();
                 

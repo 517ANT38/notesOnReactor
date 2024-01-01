@@ -19,20 +19,20 @@ public class NoteService {
     private final NoteRepo nRepo;
     private final PersonRepo pRepo;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public Flux<Note> findNotes(){
         return  nRepo.findAll()
             .flatMap(this::getChangeNote);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public Flux<Note> findNotesByTitle(String t){
         return  nRepo.findByTitle(t)
             .flatMap(this::getChangeNote)
             .switchIfEmpty(Mono.error(new NotFoundException("Note not found by title=" + t, "NOT_FOUND")));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public Mono<Note> findNoteById(long id){
         return nRepo.findById(id)
             .flatMap(this::getChangeNote)
