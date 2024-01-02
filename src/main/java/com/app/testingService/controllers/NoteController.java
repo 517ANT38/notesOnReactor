@@ -64,7 +64,7 @@ public class NoteController {
         return nService.findNotesByTitle(title,personId);
     }
 
-    @PostMapping("/personId/{personId}")
+    @PostMapping("/person_id/{personId}")
     public Mono<ResponseEntity<Note>> addNewNote(@PathVariable("personId") long personId, @RequestBody NoteDto dto){
         return nService.addNewNote(mNoteMapper.map(dto),personId)
                 .map(ResponseEntity::ok);

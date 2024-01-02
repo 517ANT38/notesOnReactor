@@ -12,5 +12,5 @@ public interface PersonRepo extends ReactiveCrudRepository<Person,Long> {
     
     Mono<Person> findByUsername(String username);
     Mono<Person> findById(Long id);
-    
+    Mono<Boolean> existsByUsername(String username);
 }

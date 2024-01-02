@@ -58,62 +58,43 @@ public class NoteService {
     }
 
     public Mono<Note> addNewNote(Note p, long personId){
-        return pRepo.existsById(personId).flatMap(x -> { if (x) {
-                return nRepo.save(p.toBuilder()
-                    .personId(personId)
-                    .build());
-            } else {
-                return Mono.error(new NotFoundException("Person not found by id=" + personId, "NOT_FOUND"));
-            }
-        });
+        return pRepo.existsById(personId).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + personId, "NOT_FOUND")))
+        .flatMap(x -> nRepo.save(p.toBuilder().personId(personId).build()));
     }
 
     
     public Mono<Note> updateNote(long id, Note p){
-        return nRepo.existsById(id).flatMap(x -> {
-            if (x) {
-                return nRepo.save(p.toBuilder().id(id).build());
-            } else {
-                return Mono.error(new NotFoundException("Note not found by id=" + id, "NOT_FOUND"));
-            }
-        });
+        return nRepo.existsById(id).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id, "NOT_FOUND")))
+        .flatMap(x -> nRepo.save(p.toBuilder().id(id).build()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public Mono<Note> updateNote(long id, long personId, Note p){
-        return nRepo.existsByIdAndPersonId(id,personId).flatMap(x -> {
-            if(x){
-                return nRepo.save(p.toBuilder()
+        return nRepo.existsByIdAndPersonId(id,personId).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id 
+                    + " and personId="+personId,"NOT_FOUND")))
+        .flatMap(x -> nRepo.save(p.toBuilder()
                     .id(id)
-                    .personId(personId).build());
-            } else {
-                return Mono.error(new NotFoundException("Note not found by id=" + id 
-                    + "and personId="+personId,"NOT_FOUND"));
-            }
-        });
+                    .personId(personId)
+                    .build()));
+        
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public Mono<Void> deleteNote(long id, long personId){
-        return nRepo.existsByIdAndPersonId(id,personId).flatMap(x -> {
-            if(x){
-                return nRepo.deleteById(id);
-            } else {
-                return Mono.error(new NotFoundException("Note not found by id=" + id 
-                    + "and personId="+personId,"NOT_FOUND"));
-            }
-        });
+        return nRepo.existsByIdAndPersonId(id,personId).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id 
+                    + " and personId="+personId,"NOT_FOUND")))
+        .flatMap(x -> nRepo.deleteById(id));
     }
 
     
     public Mono<Void> deleteNote(long id){
-        return nRepo.existsById(id).flatMap(x -> {
-            if (x) {
-                return nRepo.deleteById(id);
-            } else {
-                return Mono.error(new NotFoundException("Note not found by id=" + id, "NOT_FOUND"));
-            }
-        });
+        return nRepo.existsById(id).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id, "NOT_FOUND")))
+        .flatMap(x -> nRepo.deleteById(id));
         
     }
     

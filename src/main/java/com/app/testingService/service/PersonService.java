@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.app.testingService.app.ApiException;
 import com.app.testingService.app.NotFoundException;
 import com.app.testingService.models.Person;
 import com.app.testingService.repos.NoteRepo;
@@ -45,10 +46,10 @@ public class PersonService {
     @PreAuthorize("hasRole('ADMIN')")
     public Flux<Person> findPersons(){
         return pRepo.findAll()
-               .flatMap(x -> {
-                    return nRepo.findByPersonId(x.getId())
-                        .collect(Collectors.toSet()).map(y -> x.toBuilder().notes(y).build());
-                });
+               .flatMap(x ->  nRepo.findByPersonId(x.getId())
+                        .collect(Collectors.toSet())
+                        .map(y -> x.toBuilder().notes(y).build())
+                );
                 
     }
     
@@ -62,42 +63,38 @@ public class PersonService {
         return nRepo.findByPersonId(id)
             .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
             .collect(Collectors.toSet())
-            .flatMap(p -> {
-                return pRepo.findById(id).map(x -> x.toBuilder()
+            .flatMap(p ->pRepo.findById(id)
+                .map(x -> x.toBuilder()
                     .notes(p)
-                    .build());
-            });
+                    .build())
+            );
     }
 
+    
     public Mono<Person> addNewPerson(Person p){
-        return pRepo.save(p.toBuilder().password(passwordEncoder.encode(p.getPassword()))
+        return pRepo.existsByUsername(p.getUsername()).filter(x -> !x)
+        .switchIfEmpty(Mono.error(new ApiException("There is already a person with this username"+p.getUsername(),
+             "BAD_REQUEST")))
+        .flatMap(x -> pRepo.save(p.toBuilder().password(passwordEncoder.encode(p.getPassword()))
             .roles(Collections.singletonList("ROLE_USER"))
             .enabled(true)
             .createdAt(LocalDateTime.now())
             .build())
-            .doOnSuccess(u -> log.info("Created new user with ID = " + u.getId()));
+            .doOnSuccess(u -> log.info("Created new user with ID = " + u.getId())));
     }
 
     public Mono<Person> updatePerson(long id, Person p){
-        return pRepo.existsById(id).flatMap(x -> {
-            if (x) {
-                return pRepo.save(p.toBuilder().id(id).build());
-            } else {
-                return Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND"));
-            }
-        });
+        return pRepo.existsById(id).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
+        .flatMap(x ->  pRepo.save(p.toBuilder().id(id).build()));   
        
     }
 
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Void> deletePerson(long id){
-        return  pRepo.existsById(id).flatMap(x -> {
-            if (x) {
-                return pRepo.deleteById(id);
-            } else {
-                return Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND"));
-            }
-        });
+        return  pRepo.existsById(id).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
+        .flatMap(x ->  pRepo.deleteById(id));
         
     }
 }

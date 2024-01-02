@@ -44,7 +44,7 @@ public class PersonController {
 
    
 
-    @PostMapping
+    @PostMapping("/new")
     public Mono<ResponseEntity<PersonDtoWithNotes>> addNewPerson(@RequestBody PersonDto person) {
         return nService.addNewPerson(personMapper.map(person))
                 .map(personMapper::mapWithNotes)
