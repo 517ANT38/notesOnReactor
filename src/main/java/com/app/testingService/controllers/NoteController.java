@@ -4,9 +4,9 @@ package com.app.testingService.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,16 +70,16 @@ public class NoteController {
                 .map(ResponseEntity::ok);
     }
 
-    @PutMapping("/{id}")
-    public Mono<ResponseEntity<Note>> updateNote(@PathVariable long id, @RequestBody Note note) {
-        return nService.updateNote(id, note)
+    @PatchMapping("/{id}")
+    public Mono<ResponseEntity<Note>> updateNote(@PathVariable long id, @RequestBody NoteDto note) {
+        return nService.updateNote(id, mNoteMapper.map(note))
                 .map(ResponseEntity::ok);
     }
 
-    @PutMapping("/{id}/person_id/{personId}")
+    @PatchMapping("/{id}/person_id/{personId}")
     public Mono<ResponseEntity<Note>> updateNote(@PathVariable("id") long id, 
-        @PathVariable("personId") long personId, @RequestBody Note note) {
-        return nService.updateNote(id,personId,note)
+        @PathVariable("personId") long personId, @RequestBody NoteDto note) {
+        return nService.updateNote(id,personId,mNoteMapper.map(note))
                 .map(ResponseEntity::ok);
     }
 

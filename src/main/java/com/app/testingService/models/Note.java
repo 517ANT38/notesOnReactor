@@ -20,6 +20,5 @@ public class Note {
     private String title;
     private String txt;
     private Long personId;
-    @Transient
-    private Person person;
+    
 }

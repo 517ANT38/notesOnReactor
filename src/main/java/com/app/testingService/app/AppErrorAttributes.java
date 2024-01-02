@@ -10,6 +10,7 @@ import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.MethodNotAllowedException;
 
 import com.app.testingService.configuration.security.auth.UnauthorizedException;
 import io.jsonwebtoken.SignatureException;
@@ -49,6 +50,14 @@ public class AppErrorAttributes extends DefaultErrorAttributes{
             errorMap.put("code", ((ApiException) error).getErrorCode());
             errorMap.put("message", error.getMessage());
             errorList.add(errorMap);
+        } else if(error instanceof MethodNotAllowedException){
+
+            status = HttpStatus.METHOD_NOT_ALLOWED;
+            var errorMap = new LinkedHashMap<String, Object>();
+            errorMap.put("code","METHOD_NOT_ALLOWED");
+            errorMap.put("message", error.getMessage());
+            errorList.add(errorMap);
+
         } else if (error instanceof ExpiredJwtException || error instanceof SignatureException || error instanceof MalformedJwtException) {
             status = HttpStatus.UNAUTHORIZED;
             var errorMap = new LinkedHashMap<String, Object>();

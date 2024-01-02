@@ -22,41 +22,37 @@ public class NoteService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public Flux<Note> findNotes(){
-        return  nRepo.findAll()
-            .flatMap(this::getChangeNote);
+        return  nRepo.findAll();
     }
 
-
+    
     public Flux<Note> findNotes(long personId){
-        return nRepo.findByPersonId(personId)
-            .flatMap(this::getChangeNote);
+        return nRepo.findByPersonId(personId);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    
     public Flux<Note> findNotesByTitle(String t){
         return  nRepo.findByTitle(t)
-            .flatMap(this::getChangeNote)
             .switchIfEmpty(Mono.error(new NotFoundException("Note not found by title=" + t, "NOT_FOUND")));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Flux<Note> findNotesByTitle(String t,long personId){
         return  nRepo.findByTitleAndPersonId(t,personId)
-            .flatMap(this::getChangeNote)
             .switchIfEmpty(Mono.error(new NotFoundException("Note not found by title=" + t 
                 + "and personId="+personId, "NOT_FOUND")));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    
     public Mono<Note> findNoteById(long id){
         return nRepo.findById(id)
-            .flatMap(this::getChangeNote)
             .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id, "NOT_FOUND")));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Note> findNoteById(long id,long personId){
                
         return nRepo.findByIdAndPersonId(id,personId)
-            .flatMap(this::getChangeNote)
             .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id 
                 + "and personId="+personId, "NOT_FOUND")));
     }
@@ -65,15 +61,14 @@ public class NoteService {
         return pRepo.existsById(personId).flatMap(x -> { if (x) {
                 return nRepo.save(p.toBuilder()
                     .personId(personId)
-                    .build())
-                    .flatMap(this::getChangeNote);
+                    .build());
             } else {
                 return Mono.error(new NotFoundException("Person not found by id=" + personId, "NOT_FOUND"));
             }
         });
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    
     public Mono<Note> updateNote(long id, Note p){
         return nRepo.existsById(id).flatMap(x -> {
             if (x) {
@@ -84,6 +79,7 @@ public class NoteService {
         });
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Note> updateNote(long id, long personId, Note p){
         return nRepo.existsByIdAndPersonId(id,personId).flatMap(x -> {
             if(x){
@@ -97,6 +93,7 @@ public class NoteService {
         });
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Void> deleteNote(long id, long personId){
         return nRepo.existsByIdAndPersonId(id,personId).flatMap(x -> {
             if(x){
@@ -108,7 +105,7 @@ public class NoteService {
         });
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    
     public Mono<Void> deleteNote(long id){
         return nRepo.existsById(id).flatMap(x -> {
             if (x) {
@@ -120,12 +117,5 @@ public class NoteService {
         
     }
     
-    private Mono<Note> getChangeNote(Note note){
-        return Mono.just(note)
-                .zipWith(pRepo.findById(note.getId()))
-                .map(r -> r.getT1().toBuilder()
-                    .person(r.getT2())
-                    .build()                   
-                ); 
-    }
+  
 }
