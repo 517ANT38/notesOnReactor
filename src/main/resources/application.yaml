@@ -10,7 +10,7 @@ spring:
     visibility:
       field: any
 app:
-  public_routes: /login,/info/**,/version,/status,/actuator/**,/api/persons/new
+  public_routes: /login,/info/**,/version,/status,/actuator/**,/api/persons/new,/swagger-ui/**,/swagger-resources/**,/v3/api-docs/**
 jwt:
   password:
     encoder:
@@ -19,4 +19,9 @@ jwt:
       keylength: 256
   secret: AMDXGbO7gGwf3hoFPpm6GwQvFrqoCsn2 #This Secret For JWT HS256 Signature Algorithm MUST Have 256 bits KeySize
   expiration: 28800 # token expiration in seconds
-
+springdoc:
+  version: '@springdoc.version@'
+  api-docs:
+    version: openapi_3_1
+  swagger-ui:
+    path: /swagger-ui.html
