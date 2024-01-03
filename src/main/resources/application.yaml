@@ -10,7 +10,7 @@ spring:
     visibility:
       field: any
 app:
-  public_routes: /login,/info/**,/version,/status,/actuator/**,/api/persons/new,/swagger-ui/**,/swagger-resources/**,/v3/api-docs/**
+  public_routes: /login,/info/**,/version,/status,/actuator/**,/api/persons/new,/swagger-ui/**,/swagger-resources/**,/v3/api-docs/**,/swagger-ui.html,/webjars/**
 jwt:
   password:
     encoder:
