@@ -1,7 +1,6 @@
 package com.app.testingService.service;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.app.testingService.app.NotFoundException;
