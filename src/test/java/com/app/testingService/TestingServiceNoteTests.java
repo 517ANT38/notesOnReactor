@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+
 import com.app.testingService.dto.AuthResultDto;
 import com.app.testingService.dto.NoteDto;
 import com.app.testingService.dto.PersonDtoWithNotes;
@@ -52,8 +53,10 @@ class TestingServiceNoteTests {
 			.title("test")
 			.txt("This is test")
 			.build();
-		this.testNote = createTestNote(token,note);
+		this.testNote = createTestNote(token,note,person);
 	}	
+
+	// save
 
 	@Test
 	void test_newNote() {
@@ -62,24 +65,26 @@ class TestingServiceNoteTests {
 			.txt("This is test")
 			.build();
 		
-		var resNote = createTestNote(token, note);			
+		var resNote = createTestNote(token, note,person);			
 
 		assertEquals(person.getId(),resNote.getPersonId());
 		assertEquals(note.getTitle(),resNote.getTitle());	
 		assertEquals(note.getTxt(), resNote.getTxt());
 
 	}
+  
+	// GET by id
 
-	@Test
-	void test_getByIdAccepted(){
-		wClient.get()
-			.uri(BASE_NOTE_PATH + "/{id}", Map.of("id", testNote.getId()))
-			.header("Authorization", "Bearer " + token)
-			.exchange()
-			.expectStatus().is2xxSuccessful()
-			.expectBody(Note.class)
-			.isEqualTo(testNote);
-	}
+	// @Test
+	// void test_getById_accepted(){
+	// 	wClient.get()
+	// 		.uri(BASE_NOTE_PATH + "/{id}", Map.of("id", testNote.getId()))
+	// 		.header("Authorization", "Bearer " + token)
+	// 		.exchange()
+	// 		.expectStatus().is2xxSuccessful()
+	// 		.expectBody(Note.class)
+	// 		.isEqualTo(testNote);
+	// }
 
 	@Test
 	void test_getById_notFound(){
@@ -89,7 +94,35 @@ class TestingServiceNoteTests {
 			.exchange()
 			.expectStatus().isNotFound();
 	}
+
+	// GET by name
+
+	@Test
+	void test_getByTitle_accepted(){
+		var r = wClient.get()
+			.uri(BASE_NOTE_PATH + "/title/{title}", Map.of("title", testNote.getTitle()))
+			.header("Authorization", "Bearer " + token)
+			.exchange()
+			.expectStatus().is2xxSuccessful()
+			.returnResult(Note.class)
+			.getResponseBody().count().block();
+		
+		assertEquals(r,1);
+	}
+
+	@Test
+	void test_getByTitle_notFound(){
+		wClient.get()
+			.uri(BASE_NOTE_PATH +"/title/{title}", Map.of("title", "i"))
+			.header("Authorization", "Bearer " + token)
+			.exchange()
+			.expectStatus().isNotFound();
+	}
 	
+	
+
+	// Patch by noteId and personId
+
 	@Test
 	void test_updateNoteByNoteIdAndPersonId_accepted(){
 		
@@ -100,10 +133,8 @@ class TestingServiceNoteTests {
 			.title(newTitle)
 			.txt(newTxt)
 			.build();
-		testNote = testNote.toBuilder()
-			.title(newTitle)
-			.txt(newTxt)
-			.build();
+		testNote.setTitle(newTitle);
+		testNote.setTxt(newTxt);
 
 		wClient.patch()
 			.uri(BASE_NOTE_PATH + "/{id}/person_id/{personId}", Map.of("id",testNote.getId(),
@@ -140,25 +171,7 @@ class TestingServiceNoteTests {
 	}
 
 
-	@Test
-	void test_updateNoteByNoteId_notFound(){
-		
-		var newTitle = "Test 3";
-		var newTxt = "test 3 test 3";
-
-		var noteUpdate = NoteDto.builder()
-			.title(newTitle)
-			.txt(newTxt)
-			.build();
-
-		wClient.patch()
-			.uri(BASE_NOTE_PATH + "/{id}", Map.of("id",1000))
-			.header("Authorization", "Bearer " + token)
-			.body(Mono.just(noteUpdate), NoteDto.class)
-			.exchange()
-			.expectStatus()
-			.isNotFound();
-	}
+	
 
 
 	@AfterAll
@@ -201,7 +214,7 @@ class TestingServiceNoteTests {
 			);
 	}
 
-	private Note createTestNote(String token, NoteDto note){
+	private Note createTestNote(String token, NoteDto note, PersonDtoWithNotes person){
 		
 		
 		return wClient

@@ -14,7 +14,7 @@ public class ClearDB {
     private final NoteRepo noteRepo;
 
     void clear(){
-        noteRepo.deleteAll();
-        personRepo.deleteAll();
+        noteRepo.deleteAll().block();
+        personRepo.deleteAll().block();
     }
 }

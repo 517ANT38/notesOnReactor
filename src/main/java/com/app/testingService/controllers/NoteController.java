@@ -54,15 +54,9 @@ public class NoteController {
                 
     }
 
-    @GetMapping("/title/{title}/")
+    @GetMapping("/title/{title}")
     public Flux<Note> listNotesByTitle(@PathVariable String title) {
         return nService.findNotesByTitle(title);
-    }
-
-    @GetMapping("/title/{title}/person_id/{personId}")
-    public Flux<Note> listNotesByTitle(@PathVariable("title") String title,
-        @PathVariable("personId") long personId) {
-        return nService.findNotesByTitle(title,personId);
     }
 
     @PostMapping("/person_id/{personId}")
@@ -71,11 +65,7 @@ public class NoteController {
                 .map(x -> ResponseEntity.status(HttpStatus.CREATED).body(x));
     }
 
-    @PatchMapping("/{id}")
-    public Mono<ResponseEntity<Note>> updateNote(@PathVariable long id, @RequestBody NoteDto note) {
-        return nService.updateNote(id, mNoteMapper.map(note))
-                .map(ResponseEntity::ok);
-    }
+   
 
     @PatchMapping("/{id}/person_id/{personId}")
     public Mono<ResponseEntity<Note>> updateNote(@PathVariable("id") long id, 

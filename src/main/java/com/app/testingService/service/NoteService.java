@@ -35,12 +35,7 @@ public class NoteService {
             .switchIfEmpty(Mono.error(new NotFoundException("Note not found by title=" + t, "NOT_FOUND")));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public Flux<Note> findNotesByTitle(String t,long personId){
-        return  nRepo.findByTitleAndPersonId(t,personId)
-            .switchIfEmpty(Mono.error(new NotFoundException("Note not found by title=" + t 
-                + "and personId="+personId, "NOT_FOUND")));
-    }
+    
 
     
     public Mono<Note> findNoteById(long id){
@@ -63,13 +58,8 @@ public class NoteService {
     }
 
     
-    public Mono<Note> updateNote(long id, Note p){
-        return nRepo.existsById(id).filter(x -> x)
-        .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id, "NOT_FOUND")))
-        .flatMap(x -> nRepo.save(p.toBuilder().id(id).build()));
-    }
+    
 
-    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Note> updateNote(long id, long personId, Note p){
         return nRepo.existsByIdAndPersonId(id,personId).filter(x -> x)
         .switchIfEmpty(Mono.error(new NotFoundException("Note not found by id=" + id 
