@@ -14,6 +14,19 @@ services:
     ports:
       - "5432:5432"
 
+  db_app_notes_test:
+    image: postgres 
+    container_name: db_app_notes_test   
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_note_db_test
+    command: ["postgres", "-c","port=7101"]
+    volumes:
+      - ./src/main/resources/schema/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    ports:
+      - "7101:7101"
+
   pgadmin:
     image: dpage/pgadmin4
     environment:

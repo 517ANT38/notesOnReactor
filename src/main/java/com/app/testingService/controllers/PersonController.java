@@ -1,6 +1,7 @@
 package com.app.testingService.controllers;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +49,7 @@ public class PersonController {
     public Mono<ResponseEntity<PersonDtoWithNotes>> addNewPerson(@RequestBody PersonDto person) {
         return nService.addNewPerson(personMapper.map(person))
                 .map(personMapper::mapWithNotes)
-                .map(ResponseEntity::ok);
+                .map(x -> ResponseEntity.status(HttpStatus.CREATED).body(x));
     }
 
     @PutMapping("/{id}")
@@ -64,8 +65,8 @@ public class PersonController {
         .map(x -> ResponseEntity.ofNullable(x));
     }
 
-    @GetMapping("/{name}")
-    public Mono<ResponseEntity<PersonDtoWithNotes>> findPersonsByUserName(@PathVariable("name") String n){
+    @GetMapping("/{username}")
+    public Mono<ResponseEntity<PersonDtoWithNotes>> findPersonsByUserName(@PathVariable("username") String n){
         return nService.findPersonsByUserName(n)
                 .map(personMapper::mapWithNotes)
                 .map(ResponseEntity::ok);

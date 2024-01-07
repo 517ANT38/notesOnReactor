@@ -1,6 +1,7 @@
 package com.app.testingService.controllers;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,7 +68,7 @@ public class NoteController {
     @PostMapping("/person_id/{personId}")
     public Mono<ResponseEntity<Note>> addNewNote(@PathVariable("personId") long personId, @RequestBody NoteDto dto){
         return nService.addNewNote(mNoteMapper.map(dto),personId)
-                .map(ResponseEntity::ok);
+                .map(x -> ResponseEntity.status(HttpStatus.CREATED).body(x));
     }
 
     @PatchMapping("/{id}")

@@ -11,8 +11,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.app.testingService.dto.AuthResultDto;
@@ -21,16 +23,22 @@ import com.app.testingService.dto.PersonDtoWithNotes;
 import com.app.testingService.dto.PersonLoginDto;
 import com.app.testingService.models.Note;
 
+import reactor.core.publisher.Mono;
 
-@SpringBootTest
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+	properties = "spring.r2dbc.url=r2dbc:postgresql://localhost:7101/app_note_db_test" )
 @TestInstance(Lifecycle.PER_CLASS)
-class TestingServiceNoteTests {
+class TestingServiceNoteTests {	
 
-	
+	private final static String BASE_NOTE_PATH = "/api/notes";
 
 	@Autowired
 	private WebTestClient wClient;
-		
+	@Autowired
+	private ClearDB clearDB;
+	
 	private String token;
 	private PersonDtoWithNotes person;
 	private Note testNote;
@@ -38,27 +46,79 @@ class TestingServiceNoteTests {
 	@BeforeAll
 	public void getToken(){
 
+		this.token = requestToken("admin","admin");
+		this.person = requestAdminPerson();
+		var note = NoteDto.builder()
+			.title("test")
+			.txt("This is test")
+			.build();
+		this.testNote = createTestNote(token,note);
+	}	
+
+	@Test
+	void newNote() {
+		var note = NoteDto.builder()
+			.title("RRtest")
+			.txt("This is test")
+			.build();
+		
+		var resNote = createTestNote(token, note);			
+
+		assertEquals(person.getId(),resNote.getPersonId());
+		assertEquals(note.getTitle(),resNote.getTitle());	
+		assertEquals(note.getTxt(), resNote.getTxt());
+
+	}
+
+	@Test
+	void getByIdAccepted(){
+		wClient.get()
+			.uri(BASE_NOTE_PATH + "/{id}", Map.of("id", testNote.getId()))
+			.header("Authorization", "Bearer " + token)
+			.exchange()
+			.expectStatus().is2xxSuccessful()
+			.expectBody(Note.class)
+			.isEqualTo(testNote);
+	}
+
+	@Test
+	void getByIdNotFound(){
+		wClient.get()
+			.uri(BASE_NOTE_PATH +"/{id}", Map.of("id", 99))
+			.header("Authorization", "Bearer " + token)
+			.exchange()
+			.expectStatus().isNotFound();
+	}
+	
+	@AfterAll
+	void clearData(){
+		
+		clearDB.clear();
+
+	}
+
+
+	private String requestToken(String username, String password){
+
 		var auth = PersonLoginDto.builder()
 			.username("admin")
 			.password("admin")
 			.build();
-
-		this.token = wClient
+		return wClient
 			.post()
 			.uri("/login")
-			.body(auth, PersonLoginDto.class)
+			.body(Mono.just(auth), PersonLoginDto.class)
 			.exchange()
 			.returnResult(AuthResultDto.class)
 			.getResponseBody().next()
-			.block().getToken();			
+			.block().getToken();	
 	}
 
-	@BeforeAll
-	public void getAdminPerson(){
+	private PersonDtoWithNotes requestAdminPerson(){
 		
-		this.person = wClient
+		return wClient
 			.get()
-			.uri("/api/persons/name/admin")
+			.uri("/api/persons/{username}",Map.of("username","admin"))
 			.exchange()
 			.returnResult(PersonDtoWithNotes.class)
 			.getResponseBody()
@@ -70,69 +130,17 @@ class TestingServiceNoteTests {
 			);
 	}
 
-	@BeforeAll
-	public void createTestNote(){
-		var note = NoteDto.builder()
-			.title("test")
-			.txt("This is test")
-			.build();
+	private Note createTestNote(String token, NoteDto note){
 		
-		this.testNote = wClient
-			.post().uri("/api/notes/person/" + person.getId())
+		
+		return wClient
+			.post().uri(BASE_NOTE_PATH + "/person_id/{personId}",
+				Map.of("personId",person.getId()))
 			.header("Authorization", "Bearer " + token)
-			.body(note, NoteDto.class)
+			.body(Mono.just(note), NoteDto.class)
 			.exchange()
 			.returnResult(Note.class)
 			.getResponseBody()
 			.next().block();	 
 	}
-
-	@Test
-	void newNote() {
-		var note = NoteDto.builder()
-			.title("RRtest")
-			.txt("This is test")
-			.build();
-		
-		var resNote = wClient
-			.post().uri("/api/notes/person/" + person.getId())
-			.header("Authorization", "Bearer " + token)
-			.body(note, NoteDto.class)
-			.exchange()
-			.expectStatus().isCreated()
-			.returnResult(Note.class)
-			.getResponseBody()
-			.next().block();			
-
-		assertEquals(person.getId(),resNote.getPersonId());
-		assertEquals(note.getTitle(),resNote.getTitle());	
-		assertEquals(note.getTxt(), resNote.getTxt());
-
-	}
-
-	@Test
-	void getByIdAccepted(){
-		wClient.get()
-			.uri("/api/notes/{id}", Map.of("id", testNote.getId()))
-			.exchange()
-			.expectStatus().isAccepted()
-			.expectBody(Note.class)
-			.isEqualTo(testNote);
-	}
-
-	@Test
-	void getByIdNotFound(){
-		wClient.get()
-			.uri("/api/notes/{id}", Map.of("id", 99))
-			.exchange()
-			.expectStatus().isNotFound();
-	}
-	
-	@AfterAll
-	void clearData(){
-		
-	
-
-	}
-
 }
