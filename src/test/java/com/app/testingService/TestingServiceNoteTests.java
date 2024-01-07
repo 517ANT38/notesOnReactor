@@ -56,7 +56,7 @@ class TestingServiceNoteTests {
 	}	
 
 	@Test
-	void newNote() {
+	void test_newNote() {
 		var note = NoteDto.builder()
 			.title("RRtest")
 			.txt("This is test")
@@ -71,7 +71,7 @@ class TestingServiceNoteTests {
 	}
 
 	@Test
-	void getByIdAccepted(){
+	void test_getByIdAccepted(){
 		wClient.get()
 			.uri(BASE_NOTE_PATH + "/{id}", Map.of("id", testNote.getId()))
 			.header("Authorization", "Bearer " + token)
@@ -82,14 +82,85 @@ class TestingServiceNoteTests {
 	}
 
 	@Test
-	void getByIdNotFound(){
+	void test_getById_notFound(){
 		wClient.get()
-			.uri(BASE_NOTE_PATH +"/{id}", Map.of("id", 99))
+			.uri(BASE_NOTE_PATH +"/{id}", Map.of("id", 1000))
 			.header("Authorization", "Bearer " + token)
 			.exchange()
 			.expectStatus().isNotFound();
 	}
 	
+	@Test
+	void test_updateNoteByNoteIdAndPersonId_accepted(){
+		
+		var newTitle = "Test 2";
+		var newTxt = "test 2 test 2";
+
+		var noteUpdate = NoteDto.builder()
+			.title(newTitle)
+			.txt(newTxt)
+			.build();
+		testNote = testNote.toBuilder()
+			.title(newTitle)
+			.txt(newTxt)
+			.build();
+
+		wClient.patch()
+			.uri(BASE_NOTE_PATH + "/{id}/person_id/{personId}", Map.of("id",testNote.getId(),
+				"personId",testNote.getPersonId()))
+			.header("Authorization", "Bearer " + token)
+			.body(Mono.just(noteUpdate), NoteDto.class)
+			.exchange()
+			.expectStatus()
+			.is2xxSuccessful()
+			.expectBody(Note.class)
+			.isEqualTo(testNote);
+	}
+
+
+	@Test
+	void test_updateNoteByNoteIdAndPersonId_notFound(){
+		
+		var newTitle = "Test 3";
+		var newTxt = "test 3 test 3";
+
+		var noteUpdate = NoteDto.builder()
+			.title(newTitle)
+			.txt(newTxt)
+			.build();
+
+		wClient.patch()
+			.uri(BASE_NOTE_PATH + "/{id}/person_id/{personId}", Map.of("id",testNote.getId(),
+				"personId",1000))
+			.header("Authorization", "Bearer " + token)
+			.body(Mono.just(noteUpdate), NoteDto.class)
+			.exchange()
+			.expectStatus()
+			.isNotFound();
+	}
+
+
+	@Test
+	void test_updateNoteByNoteId_notFound(){
+		
+		var newTitle = "Test 3";
+		var newTxt = "test 3 test 3";
+
+		var noteUpdate = NoteDto.builder()
+			.title(newTitle)
+			.txt(newTxt)
+			.build();
+
+		wClient.patch()
+			.uri(BASE_NOTE_PATH + "/{id}", Map.of("id",1000))
+			.header("Authorization", "Bearer " + token)
+			.body(Mono.just(noteUpdate), NoteDto.class)
+			.exchange()
+			.expectStatus()
+			.isNotFound();
+	}
+
+
 	@AfterAll
 	void clearData(){
 		
