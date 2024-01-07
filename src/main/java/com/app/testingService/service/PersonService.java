@@ -53,9 +53,13 @@ public class PersonService {
                 
     }
     
-    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Person> findPersonsByUserName(String n){
-        return pRepo.findByUsername(n);
+        return pRepo.findByUsername(n)
+            .switchIfEmpty(Mono.error(new NotFoundException("Person not found by username=" + n, "NOT_FOUND")))
+            .flatMap(p -> nRepo.findByPersonId(p.getId())
+                .collect(Collectors.toSet())
+                .map(x -> p.toBuilder()
+                    .notes(x).build()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

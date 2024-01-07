@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.testingService.dto.PersonDto;
 import com.app.testingService.dto.PersonDtoWithNotes;
 import com.app.testingService.dto.mapper.PersonMapper;
-import com.app.testingService.models.Person;
 import com.app.testingService.service.PersonService;
 
 import lombok.AllArgsConstructor;
@@ -33,13 +32,14 @@ public class PersonController {
     public Mono<ResponseEntity<PersonDtoWithNotes>> getPerson(@PathVariable long id) {
         return nService.findPersonById(id)
                 .map(personMapper::mapWithNotes)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping
-    public Flux<Person> listPersons() {
-        return nService.findPersons();
+    public Flux<ResponseEntity<PersonDtoWithNotes>> listPersons() {
+        return nService.findPersons()
+                .map(personMapper::mapWithNotes)
+                .map(ResponseEntity::ok);
     }
 
    
@@ -48,20 +48,26 @@ public class PersonController {
     public Mono<ResponseEntity<PersonDtoWithNotes>> addNewPerson(@RequestBody PersonDto person) {
         return nService.addNewPerson(personMapper.map(person))
                 .map(personMapper::mapWithNotes)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok);
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Person>> updatePerson(@PathVariable long id, @RequestBody PersonDto person) {
+    public Mono<ResponseEntity<PersonDtoWithNotes>> updatePerson(@PathVariable long id, @RequestBody PersonDto person) {
         return nService.updatePerson(id, personMapper.map(person))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(personMapper::mapWithNotes)
+                .map(ResponseEntity::ok);
     }
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deletePerson(@PathVariable long id) {
         return nService.deletePerson(id).onErrorMap(error -> error)
         .map(x -> ResponseEntity.ofNullable(x));
+    }
+
+    @GetMapping("/{name}")
+    public Mono<ResponseEntity<PersonDtoWithNotes>> findPersonsByUserName(@PathVariable("name") String n){
+        return nService.findPersonsByUserName(n)
+                .map(personMapper::mapWithNotes)
+                .map(ResponseEntity::ok);
     }
 }
