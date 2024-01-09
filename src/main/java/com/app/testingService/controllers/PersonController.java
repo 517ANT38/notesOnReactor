@@ -46,7 +46,7 @@ public class PersonController {
     }
 
     @PatchMapping("/{id}/enabled/{e}")
-    public Mono<ResponseEntity<Void>> updateEnablePerson(long id, String e){
+    public Mono<ResponseEntity<Void>> updateEnablePerson(@PathVariable long id,@PathVariable String e){
         return nService.updateEnablePerson(id, OnOrOff.findByName(e).isF())
             .map(ResponseEntity::ok);
     }

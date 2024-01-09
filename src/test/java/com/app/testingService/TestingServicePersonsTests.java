@@ -74,6 +74,7 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
             .get().uri(BASE_PERSON_PATH + "/{id}",
                 Map.of("id", person.getId()))
                 .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .is2xxSuccessful()
@@ -113,6 +114,7 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
             
         wClient.patch()
             .uri(BASE_PERSON_PATH + "/{id}", Map.of("id", testPerson.getId()))
+            .header("Authorization", "Bearer " + token)
             .body(Mono.just(p), PersonDto.class)
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -138,6 +140,7 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
             
         wClient.patch()
             .uri(BASE_PERSON_PATH + "/{id}", Map.of("id", testPerson.getId()))
+            .header("Authorization", "Bearer " + token)
             .body(Mono.just(p), PersonDto.class)
             .exchange()
             .expectStatus().isNotFound();
@@ -159,9 +162,38 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
             
         wClient.patch()
             .uri(BASE_PERSON_PATH + "/{id}", Map.of("id", testPerson.getId()))
+            .header("Authorization", "Bearer " + token)
             .body(Mono.just(p), PersonDto.class)
             .exchange()
             .expectStatus().isBadRequest();
 
+    }
+
+    @Test
+    void test_deletePersonById_notFound(){
+        wClient.delete()
+            .uri(BASE_PERSON_PATH + "/{id}", Map.of("id", testPerson.getId()))
+            .header("Authorization", "Bearer " + token)
+            .exchange()
+            .expectStatus().isNotFound();
+    }
+
+
+    @Test
+    void test_updatePersonEnable_accepted(){
+        wClient.patch()
+            .uri(BASE_PERSON_PATH + "/{id}/enabled/{e}",Map.of("id", testPerson.getId(),"e","dhjd"))
+            .header("Authorization", "Bearer " + token)
+            .exchange()
+            .expectStatus().is2xxSuccessful();
+    }
+
+    @Test
+    void test_updatePersonEnable_notFound(){
+        wClient.patch()
+            .uri(BASE_PERSON_PATH + "/{id}/enabled/{e}",Map.of("id", 1000,"e","dhjd"))
+            .header("Authorization", "Bearer " + token)
+            .exchange()
+            .expectStatus().is2xxSuccessful();
     }
 }

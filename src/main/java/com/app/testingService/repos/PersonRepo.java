@@ -18,10 +18,10 @@ public interface PersonRepo extends ReactiveCrudRepository<Person,Long> {
     Mono<Boolean> existsByUsername(String username);
 
     @Modifying
-    @Query("update person set enabled=:e where id=:id ")
+    @Query("update person pe set pe.enabled=:e where pe.id=:id ")
     Mono<Void> updateEnablePerson(@Param("id") Long id, @Param("e") boolean e);  
 
     @Modifying
-    @Query("update person set password=:p where id=:id ")
+    @Query("update person pe set pe.password=:p where pe.id=:id ")
     Mono<Void> updatePasswordPerson(@Param("id") Long id, @Param("p") String p);  
 }

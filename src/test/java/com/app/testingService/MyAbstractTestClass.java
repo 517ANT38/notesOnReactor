@@ -55,7 +55,7 @@ public abstract class MyAbstractTestClass {
 			.username("tester")
             .password("test")
 			.build();
-        this.testPerson = createTestPeron(token, person);
+        this.testPerson = createTestPeron(person);
 		System.out.println(testPerson);
 	}	
 
@@ -66,7 +66,7 @@ public abstract class MyAbstractTestClass {
 
 	}
 
-    private  PersonDtoWithNotes createTestPeron(String token, PersonDto dto){
+    private  PersonDtoWithNotes createTestPeron(PersonDto dto){
        
 		
         return wClient
