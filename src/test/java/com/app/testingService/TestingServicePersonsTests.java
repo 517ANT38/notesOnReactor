@@ -74,7 +74,6 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
             .get().uri(BASE_PERSON_PATH + "/{id}",
                 Map.of("id", person.getId()))
                 .header("Authorization", "Bearer " + token)
-                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus()
                 .is2xxSuccessful()
@@ -180,12 +179,39 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
 
 
     @Test
-    void test_updatePersonEnable_accepted(){
+    void test_updatePersonEnable_none_accepted(){
         wClient.patch()
             .uri(BASE_PERSON_PATH + "/{id}/enabled/{e}",Map.of("id", testPerson.getId(),"e","dhjd"))
             .header("Authorization", "Bearer " + token)
             .exchange()
             .expectStatus().is2xxSuccessful();
+
+        wClient.get().uri(BASE_PERSON_PATH + "/{id}",
+                Map.of("id", testPerson.getId()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody()
+                    .jsonPath("$.enabled").isEqualTo(false);
+    }
+
+    @Test
+    void test_updatePersonEnable_on_accepted(){
+        wClient.patch()
+            .uri(BASE_PERSON_PATH + "/{id}/enabled/{e}",Map.of("id", testPerson.getId(),"e","ON"))
+            .header("Authorization", "Bearer " + token)
+            .exchange()
+            .expectStatus().is2xxSuccessful();
+
+        wClient.get().uri(BASE_PERSON_PATH + "/{id}",
+                Map.of("id", testPerson.getId()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody()
+                    .jsonPath("$.enabled").isEqualTo(true);
     }
 
     @Test
@@ -194,6 +220,6 @@ public class TestingServicePersonsTests extends MyAbstractTestClass {
             .uri(BASE_PERSON_PATH + "/{id}/enabled/{e}",Map.of("id", 1000,"e","dhjd"))
             .header("Authorization", "Bearer " + token)
             .exchange()
-            .expectStatus().is2xxSuccessful();
+            .expectStatus().isNotFound();
     }
 }
