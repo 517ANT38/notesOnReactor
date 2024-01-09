@@ -74,6 +74,12 @@ public class PersonService {
             );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    public Mono<Void> updateEnablePerson(long id, boolean e){
+        return pRepo.existsById(id).filter(x -> x)
+            .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
+            .flatMap(x -> pRepo.updateEnablePerson(id, e));
+    }
     
     public Mono<Person> addNewPerson(Person p){
         return pRepo.existsByUsername(p.getUsername()).filter(x -> !x)
@@ -90,7 +96,11 @@ public class PersonService {
     public Mono<Person> updatePerson(long id, Person p){
         return pRepo.existsById(id).filter(x -> x)
         .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
-        .flatMap(x ->  pRepo.save(p.toBuilder().id(id).build()));   
+            .flatMap(x ->  pRepo.existsByUsername(p.getUsername())
+                .filter(z -> !z)
+                .switchIfEmpty(Mono.error(new ApiException("There is already a person with this username"+p.getUsername(),
+                "BAD_REQUEST")))
+                .flatMap(y -> pRepo.save(p.toBuilder().id(id).build())));   
        
     }
 
@@ -100,5 +110,11 @@ public class PersonService {
         .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
         .flatMap(x ->  pRepo.deleteById(id));
         
+    }
+
+    public Mono<Void> updatePassword(long id, String password) {
+        return pRepo.existsById(id).filter(x -> x)
+        .switchIfEmpty(Mono.error(new NotFoundException("Person not found by id=" + id, "NOT_FOUND")))
+        .flatMap(x -> pRepo.updatePasswordPerson(id, password));
     }
 }

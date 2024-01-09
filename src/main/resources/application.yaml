@@ -2,7 +2,7 @@ server:
   port: 9000
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/app_note_db
+    url: r2dbc:postgresql://localhost:7101/app_note_db_test
     username: postgres
     password: postgres
   jackson:
