@@ -54,6 +54,8 @@ public abstract class MyAbstractTestClass {
         var person = PersonDto.builder()
 			.username("tester")
             .password("test")
+			.firstName("BBB")
+			.lastName("YYY")
 			.build();
         this.testPerson = createTestPeron(person);
 		System.out.println(testPerson);
@@ -73,9 +75,9 @@ public abstract class MyAbstractTestClass {
 			.post().uri(BASE_PERSON_PATH + "/new")
 			.body(Mono.just(dto), PersonDto.class)
 			.exchange()
-			.returnResult(PersonDtoWithNotes.class)
-			.getResponseBody().next()
-			.block();
+			.expectBody(PersonDtoWithNotes.class)
+			.returnResult()
+            .getResponseBody();
             
     }
 

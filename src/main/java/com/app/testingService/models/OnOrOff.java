@@ -14,9 +14,10 @@ public enum OnOrOff {
     private boolean f;
 
     public static OnOrOff findByName(String name){
-            return Arrays.stream(values())
+            var r = Arrays.stream(values())
                     .filter(x->x.name().equals(name))
                     .findAny().orElse(NONE);
-    }
+            return r;
+                }
 
 }

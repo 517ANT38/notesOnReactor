@@ -1,6 +1,6 @@
 package com.app.testingService.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewPassword {
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String pwd;
 }

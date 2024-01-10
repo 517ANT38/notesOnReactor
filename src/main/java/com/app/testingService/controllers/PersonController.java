@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.app.testingService.dto.UpdateEnableStatus;
 import com.app.testingService.dto.NewPassword;
 import com.app.testingService.dto.PersonDto;
 import com.app.testingService.dto.PersonDtoWithNotes;
@@ -47,7 +47,7 @@ public class PersonController {
 
     @PatchMapping("/{id}/enabled/{e}")
     public Mono<ResponseEntity<Void>> updateEnablePerson(@PathVariable long id,@PathVariable String e){
-        return nService.updateEnablePerson(id, OnOrOff.findByName(e).isF())
+        return nService.updateEnablePerson(id, OnOrOff.findByName(e).isF())           
             .map(ResponseEntity::ok);
     }
    
